@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">LocationAPI</string>
+    <string name="unknownCheckBox">Desconhecido</string>
+    <string name="usedInFixCheckBox">Usado para localizar</string>
+    <string name="notUsedInFixCheckBox">Não usado para localizar</string>
+    <string name="glonassCheckBox">Glonass</string>
+    <string name="galileoCheckBox">Galileo</string>
+    <string name="gpsCheckBox">GPS</string>
+    <string name="textQuiz">Atividade Avaliativa 1</string>
+    <string name="button_gnss">Visualizar GNSS</string>
+    <string name="button_activitity2">Atividade 2</string>
+    <string name="button_activitity3">Atividade 3</string>
+    <string name="northLocation">Norte</string>
+    <string name="southLocation">Sul</string>
+    <string name="eastLocation">Leste</string>
+    <string name="westLocation">Oeste</string>
+    <string name="textConstellationsLegend">Legenda Constelações</string>
+    <string name="redLegend">Vermelho: GPS</string>
+    <string name="greyLegend">Cinza: Desconhecido</string>
+    <string name="greenLegend">Verde: Galileo</string>
+    <string name="yellowLegend">Amarelo: Glonass</string>
+    <string name="textLoading">Carregando...</string>
+    <string name="textQualitySatelite">Qualidade do satelite</string>
+    <string name="user_location_title">Localização do usuário</string>
+    <string name="textNoPermition">Sem permissão para acessar o sistema de posicionamento</string>
+    <string name="buttonSave">Salvar</string>
+    <string name="buttonCancel">Cancelar</string>
+    <string name="textYes">Sim</string>
+    <string name="textNo">Não</string>
+    <string name="textLastPosition">Dados da Última posição</string>
+    <string name="textLocationNotAvailable">Localização não disponível</string>
+    <string name="textChooseLatLon">Escolha o formato da Latitude/Longitude</string>
+    <string name="textHeadingDegrees">rumo (graus)</string>
+
 </resources>

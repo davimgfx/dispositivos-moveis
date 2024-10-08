@@ -16,7 +16,7 @@ import androidx.annotation.Nullable;
 
 public class EsferaCelesteView extends View {
     private GnssStatus newStatus;
-    private Paint paint;
+    private Paint paint, paintGps, paintGalileo, paintGlonass;
     private int r;
     private int height, width;
     private GNSSActivity gnssActivity;
@@ -35,56 +35,6 @@ public class EsferaCelesteView extends View {
                 showSatelliteSelectionDialog();
             }
         });
-    }
-
-    private void showSatelliteSelectionDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Localização do usuário");
-
-        // Cria o layout para o diálogo
-        View dialogView = inflate(getContext(), R.layout.dialog_layout, null);
-        builder.setView(dialogView);
-
-        // CheckBoxes para constelações
-        CheckBox gpsCheckBox = dialogView.findViewById(R.id.gpsCheckBox);
-        CheckBox galileoCheckBox = dialogView.findViewById(R.id.galileoCheckBox);
-        CheckBox glonassCheckBox = dialogView.findViewById(R.id.glonassCheckBox);
-        CheckBox unknownCheckBox = dialogView.findViewById(R.id.unknownCheckBox);
-        CheckBox usedInFixCheckBox = dialogView.findViewById(R.id.usedInFixCheckBox);
-        CheckBox notUsedInFixCheckBox = dialogView.findViewById(R.id.notUsedInFixCheckBox);
-
-        // Marque todos os checkboxes como selecionados por padrão
-        gpsCheckBox.setChecked(true);
-        galileoCheckBox.setChecked(true);
-        glonassCheckBox.setChecked(true);
-        unknownCheckBox.setChecked(true);
-        usedInFixCheckBox.setChecked(true);
-        notUsedInFixCheckBox.setChecked(true);
-
-        // Recuperar as preferências salvas
-        gpsCheckBox.setChecked(gnssActivity.getSatellitePreference("gpsChecked", true));
-        galileoCheckBox.setChecked(gnssActivity.getSatellitePreference("galileoChecked", true));
-        glonassCheckBox.setChecked(gnssActivity.getSatellitePreference("glonassChecked", true));
-        unknownCheckBox.setChecked(gnssActivity.getSatellitePreference("unknownChecked", true));
-        usedInFixCheckBox.setChecked(gnssActivity.getSatellitePreference("usedInFix", true));
-        notUsedInFixCheckBox.setChecked(gnssActivity.getSatellitePreference("notUsedInFix", true));
-
-        builder.setPositiveButton("Salvar", (dialog, which) -> {
-            // Salvar as informações no SharedPreferences usando GNSSActivity
-            gnssActivity.saveSatellitePreferences(
-                    gpsCheckBox.isChecked(),
-                    galileoCheckBox.isChecked(),
-                    glonassCheckBox.isChecked(),
-                    unknownCheckBox.isChecked(),
-                    usedInFixCheckBox.isChecked(),
-                    notUsedInFixCheckBox.isChecked()
-            );
-        });
-
-        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
     @Override
@@ -177,11 +127,61 @@ public class EsferaCelesteView extends View {
                     paint.setTextAlign(Paint.Align.LEFT);
                     paint.setTextSize(30);
                     String satID = newStatus.getSvid(i) + "";
-                    String statusText = usedInFix ? " - Sim" : " - Não";
+                    String statusText = usedInFix ? " - " + getContext().getString(R.string.textYes) : " - " + getContext().getString(R.string.textNo);
                     canvas.drawText(satID + statusText, computeXc(x) + 10, computeYc(y) + 10, paint);
                 }
             }
         }
+    }
+
+    private void showSatelliteSelectionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(getContext().getString(R.string.user_location_title));
+
+        // Cria o layout para o diálogo
+        View dialogView = inflate(getContext(), R.layout.dialog_layout, null);
+        builder.setView(dialogView);
+
+        // CheckBoxes para constelações
+        CheckBox gpsCheckBox = dialogView.findViewById(R.id.gpsCheckBox);
+        CheckBox galileoCheckBox = dialogView.findViewById(R.id.galileoCheckBox);
+        CheckBox glonassCheckBox = dialogView.findViewById(R.id.glonassCheckBox);
+        CheckBox unknownCheckBox = dialogView.findViewById(R.id.unknownCheckBox);
+        CheckBox usedInFixCheckBox = dialogView.findViewById(R.id.usedInFixCheckBox);
+        CheckBox notUsedInFixCheckBox = dialogView.findViewById(R.id.notUsedInFixCheckBox);
+
+        // Marque todos os checkboxes como selecionados por padrão
+        gpsCheckBox.setChecked(true);
+        galileoCheckBox.setChecked(true);
+        glonassCheckBox.setChecked(true);
+        unknownCheckBox.setChecked(true);
+        usedInFixCheckBox.setChecked(true);
+        notUsedInFixCheckBox.setChecked(true);
+
+        // Recuperar as preferências salvas
+        gpsCheckBox.setChecked(gnssActivity.getSatellitePreference("gpsChecked", true));
+        galileoCheckBox.setChecked(gnssActivity.getSatellitePreference("galileoChecked", true));
+        glonassCheckBox.setChecked(gnssActivity.getSatellitePreference("glonassChecked", true));
+        unknownCheckBox.setChecked(gnssActivity.getSatellitePreference("unknownChecked", true));
+        usedInFixCheckBox.setChecked(gnssActivity.getSatellitePreference("usedInFix", true));
+        notUsedInFixCheckBox.setChecked(gnssActivity.getSatellitePreference("notUsedInFix", true));
+
+        builder.setPositiveButton(getContext().getString(R.string.buttonSave), (dialog, which) -> {
+            // Salvar as informações no SharedPreferences usando GNSSActivity
+            gnssActivity.saveSatellitePreferences(
+                    gpsCheckBox.isChecked(),
+                    galileoCheckBox.isChecked(),
+                    glonassCheckBox.isChecked(),
+                    unknownCheckBox.isChecked(),
+                    usedInFixCheckBox.isChecked(),
+                    notUsedInFixCheckBox.isChecked()
+            );
+        });
+
+        builder.setNegativeButton(getContext().getString(R.string.buttonCancel), (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private int computeXc(double x) {

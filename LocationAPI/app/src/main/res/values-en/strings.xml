@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LocationAPI</string>
+    <string name="unknownCheckBox">Unknown</string>
+    <string name="usedInFixCheckBox">Used in fix</string>
+    <string name="notUsedInFixCheckBox">Not used in fix</string>
+    <string name="glonassCheckBox">Glonass</string>
+    <string name="galileoCheckBox">Galileo</string>
+    <string name="gpsCheckBox">GPS</string>
+    <string name="textQuiz">Assessment Activity 1</string>
+    <string name="button_gnss">GNSSView</string>
+    <string name="button_activitity2">Activity 2</string>
+    <string name="button_activitity3">Activity 3</string>
+    <string name="northLocation">North</string>
+    <string name="southLocation">South</string>
+    <string name="eastLocation">East</string>
+    <string name="westLocation">West</string>
+    <string name="textConstellationsLegend">Constellations Legend</string>
+    <string name="redLegend">Red: GPS</string>
+    <string name="greenLegend">Green: Galileo</string>
+    <string name="greyLegend">Grey: unknown</string>
+    <string name="yellowLegend">Yellow: Glonass</string>
+    <string name="textLoading">Loading...</string>
+    <string name="textQualitySatelite">Satelite Quality</string>
+    <string name="user_location_title">User Location</string>
+    <string name="textNoPermition">No permission to access the positioning system.</string>
+    <string name="buttonSave">Save</string>
+    <string name="buttonCancel">Cancel</string>
+    <string name="textYes">Yes</string>
+    <string name="textNo">No</string>
+    <string name="textLastPosition">Last position data</string>
+    <string name="textLocationNotAvailable">Location not available</string>
+    <string name="textChooseLatLon">Choose the Latitude/Longitude format</string>
+    <string name="textHeadingDegrees">heading (degrees)</string>
+</resources>

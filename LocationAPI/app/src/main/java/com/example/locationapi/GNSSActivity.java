@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import android.content.Context;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -24,13 +25,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class GNSSActivity extends AppCompatActivity implements SensorEventListener{
+import com.github.mikephil.charting.charts.ScatterChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.ScatterData;
+import com.github.mikephil.charting.data.ScatterDataSet;
+
+
+import java.util.ArrayList;
+
+public class GNSSActivity extends AppCompatActivity implements SensorEventListener {
     private LocationManager locationManager; // O Gerente de localização
     private LocationProvider locationProvider; // O provedor de localizações
     private static final int REQUEST_LOCATION = 1;
     private static final String PREFS_NAME = "LocationSettings";
     private static final String COORDINATE_FORMAT_KEY = "coordinate_format";
-    private String[] formats = {"Graus [+/-DDD.DDDDD]", "Graus-Minutos [+/-DDD:MM.MMMMM]", "Graus-Minutos-Segundos [+/-DDD:MM:SS.SSSSS]"};
+    private String[] formats = {"[+/-DDD.DDDDD]", "[+/-DDD:MM.MMMMM]", "[+/-DDD:MM:SS.SSSSS]"};
     private int selectedFormatIndex = 0;
     private ImageView compassArrow;
 
@@ -65,8 +76,10 @@ public class GNSSActivity extends AppCompatActivity implements SensorEventListen
         // Carregar a preferência de formato salva
         loadSelectedFormat();
 
+        // Dialog
         TextView textViewLocation = findViewById(R.id.textviewLocation_id);
         textViewLocation.setOnClickListener(v -> showFormatDialog());
+
     }
 
     @Override
@@ -142,7 +155,7 @@ public class GNSSActivity extends AppCompatActivity implements SensorEventListen
                 obtemLocationProvider_Permission();
             } else {
                 // O usuário não deu a permissão solicitada
-                Toast.makeText(this, "Sem permissão para acessar o sistema de posicionamento",
+                Toast.makeText(this, getString(R.string.textNoPermition),
                         Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -159,17 +172,18 @@ public class GNSSActivity extends AppCompatActivity implements SensorEventListen
 
                 mostraLocation(location);
             }
+
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
                 LocationListener.super.onStatusChanged(provider, status, extras);
             }
         });
         locationManager.registerGnssStatusCallback(new GnssStatus.Callback() {
-             @Override
+            @Override
             public void onSatelliteStatusChanged(@NonNull GnssStatus status) {
                 super.onSatelliteStatusChanged(status);
-                    mostraGNSS(status);
-                 mostraGNSSGrafico(status);
+                mostraGNSSGrafico(status);
+                mostraGNSSScatterPlot(status);
             }
         });
     }
@@ -191,88 +205,13 @@ public class GNSSActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void mostraGNSSGrafico(GnssStatus status) {
-        EsferaCelesteView esferaCelesteView=findViewById(R.id.esferacelesteview_id);
+        EsferaCelesteView esferaCelesteView = findViewById(R.id.esferacelesteview_id);
         esferaCelesteView.setNewStatus(status);
-    }
-
-    public void mostraGNSS(GnssStatus status) {
-        TextView textView = findViewById(R.id.textSatelliteQuality_id);
-        StringBuilder mens = new StringBuilder();
-
-        // Verificar quais constelações e estados de uso estão selecionados
-        boolean isGpsChecked = getSatellitePreference("gpsChecked", true);
-        boolean isGalileoChecked = getSatellitePreference("galileoChecked", true);
-        boolean isGlonassChecked = getSatellitePreference("glonassChecked", true);
-        boolean isUnknownChecked = getSatellitePreference("unknownChecked", true);
-        boolean isUsedInFixChecked = getSatellitePreference("usedInFix", true);
-        boolean isNotUsedInFixChecked = getSatellitePreference("notUsedInFix", true);
-
-        // Verifica se pelo menos uma constelação ou estado de uso está selecionado
-        if (!isGpsChecked && !isGalileoChecked && !isGlonassChecked && !isUnknownChecked &&
-                !isUsedInFixChecked && !isNotUsedInFixChecked) {
-            mens.append("Nenhuma constelação ou estado de uso selecionado.\n");
-            textView.setText(mens.toString());
-            return;
-        }
-
-        if (status != null) {
-            int validSatelliteCount = 0; // Contador de satélites válidos
-
-            // Adiciona contagem de satélites filtrados
-            for (int i = 0; i < status.getSatelliteCount(); i++) {
-                int constellationType = status.getConstellationType(i);
-                boolean usedInFix = status.usedInFix(i); // Verifica se o satélite está sendo utilizado para a fixação
-
-                // Filtra com base nas constelações selecionadas e se estão usadas na fixação
-                boolean shouldDisplay = false;
-
-                if ((constellationType == GnssStatus.CONSTELLATION_GPS && isGpsChecked) ||
-                        (constellationType == GnssStatus.CONSTELLATION_GALILEO && isGalileoChecked) ||
-                        (constellationType == GnssStatus.CONSTELLATION_GLONASS && isGlonassChecked) ||
-                        (constellationType == GnssStatus.CONSTELLATION_UNKNOWN && isUnknownChecked)) {
-
-                    if ((usedInFix && isUsedInFixChecked) || (!usedInFix && isNotUsedInFixChecked)) {
-                        shouldDisplay = true;
-                        validSatelliteCount++; // Incrementa o contador para satélites válidos
-                    }
-                }
-
-                // Se deve exibir, adiciona informações à mensagem
-                if (shouldDisplay) {
-                    mens.append("SVID-CONST-SNR=")
-                            .append(status.getSvid(i)).append("-")
-                            .append(getConstellationName(constellationType)).append("-")
-                            .append(status.getCn0DbHz(i)).append("\n");
-                }
-            }
-
-            // Atualiza o número de satélites baseado no filtro aplicado
-            mens.insert(0, "Número de Satélites: " + validSatelliteCount + "\n");
-        } else {
-            mens.append("GNSS Não disponível");
-        }
-
-        textView.setText(mens.toString());
-    }
-
-    // Método auxiliar para obter o nome da constelação com base no tipo
-    private String getConstellationName(int constellationType) {
-        switch (constellationType) {
-            case GnssStatus.CONSTELLATION_GPS:
-                return "GPS";
-            case GnssStatus.CONSTELLATION_GALILEO:
-                return "Galileo";
-            case GnssStatus.CONSTELLATION_GLONASS:
-                return "GLONASS";
-            case GnssStatus.CONSTELLATION_UNKNOWN:
-            default:
-                return "Desconhecido";
-        }
     }
 
     public void mostraLocation(Location location) {
         TextView textView = findViewById(R.id.textviewLocation_id);
-        String mens = "Dados da Última posição\n";
+        String mens = getString(R.string.textLastPosition) + "\n";
 
         if (location != null) {
             String latitudeFormatted;
@@ -301,11 +240,11 @@ public class GNSSActivity extends AppCompatActivity implements SensorEventListen
                     break;
             }
 
-            mens += "Latitude = " + latitudeFormatted + "\n"
-                    + "Longitude = " + longitudeFormatted + "\n"
-                    + "Altitude (m) = " + location.getAltitude();
+            mens += "Lat = " + latitudeFormatted + "\n"
+                    + "Long = " + longitudeFormatted + "\n"
+                    + "Alt (m) = " + location.getAltitude();
         } else {
-            mens += "Localização Não disponível";
+            mens += getString(R.string.textLocationNotAvailable);
         }
 
         textView.setText(mens);
@@ -313,13 +252,13 @@ public class GNSSActivity extends AppCompatActivity implements SensorEventListen
 
     private void mostraRumo(float azimuth) {
         TextView textView = findViewById(R.id.textDisplacement_id);
-        String mens = "Rumo (graus): " + azimuth;
+        String mens = getString(R.string.textHeadingDegrees) + " = " +azimuth;
         textView.setText(mens);
     }
 
     private void showFormatDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Escolha o formato da Latitude/Longitude");
+        builder.setTitle(getString(R.string.textChooseLatLon));
 
         // Recuperar a preferência atual salva
         int selectedFormat = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -349,4 +288,127 @@ public class GNSSActivity extends AppCompatActivity implements SensorEventListen
         selectedFormatIndex = sharedPreferences.getInt(COORDINATE_FORMAT_KEY, 0);  // Padrão é 0
     }
 
-}
+    public void mostraGNSSScatterPlot(GnssStatus status) {
+        // Recupera as preferências do usuário
+        SharedPreferences sharedPreferences = getSharedPreferences("SatellitePreferences", Context.MODE_PRIVATE);
+        boolean gpsSelected = sharedPreferences.getBoolean("gpsChecked", true);
+        boolean galileoSelected = sharedPreferences.getBoolean("galileoChecked", true);
+        boolean glonassSelected = sharedPreferences.getBoolean("glonassChecked", true);
+        boolean unknownSelected = sharedPreferences.getBoolean("unknownChecked", true);
+        boolean usedInFixSelected = sharedPreferences.getBoolean("usedInFix", true);
+        boolean notUsedInFixSelected = sharedPreferences.getBoolean("notUsedInFix", true);
+
+        ScatterChart scatterChart = findViewById(R.id.scatterChart);
+        ArrayList<Entry> scatterEntriesGPS = new ArrayList<>();
+        ArrayList<Entry> scatterEntriesGlonass = new ArrayList<>();
+        ArrayList<Entry> scatterEntriesGalileo = new ArrayList<>();
+        ArrayList<Entry> scatterEntriesUnknown = new ArrayList<>();
+
+        if (!gpsSelected && !galileoSelected && !glonassSelected && !unknownSelected) {
+            scatterChart.clear();
+            scatterChart.invalidate();
+            return; // Não continua o processamento
+        }
+
+
+        if (status != null) {
+            for (int i = 0; i < status.getSatelliteCount(); i++) {
+                int svid = status.getSvid(i); // Obtém o SVID (Satellite Vehicle ID)
+                float snr = status.getCn0DbHz(i); // Obtém o (SNR)
+                int constellationType = status.getConstellationType(i); // Obtém o tipo de constelação
+                boolean usedInFix = status.usedInFix(i);
+
+                if (( usedInFix && !usedInFixSelected) || (!usedInFix && !notUsedInFixSelected)) {
+                    continue; // Pula este satélite se não atender os filtros
+                }
+
+                // Aplica os filtros das constelações com base nas preferências
+                boolean shouldAdd;
+                switch (constellationType) {
+                    case GnssStatus.CONSTELLATION_GPS:
+                        shouldAdd = gpsSelected;
+                        if (shouldAdd) {
+                            scatterEntriesGPS.add(new Entry(svid, snr)); // GPS
+                        }
+                        break;
+                    case GnssStatus.CONSTELLATION_GLONASS:
+                        shouldAdd = glonassSelected;
+                        if (shouldAdd) {
+                            scatterEntriesGlonass.add(new Entry(svid, snr)); // Glonass
+                        }
+                        break;
+                    case GnssStatus.CONSTELLATION_GALILEO:
+                        shouldAdd = galileoSelected;
+                        if (shouldAdd) {
+                            scatterEntriesGalileo.add(new Entry(svid, snr)); // Galileo
+                        }
+                        break;
+                    default:
+                        shouldAdd = unknownSelected;
+                        if (shouldAdd) {
+                            scatterEntriesUnknown.add(new Entry(svid, snr)); // Desconhecido
+                        }
+                        break;
+                }
+            }
+
+            // Criação dos conjuntos de dados para o gráfico
+            ScatterData scatterData = new ScatterData();
+
+                if (!scatterEntriesGPS.isEmpty()) {
+                    ScatterDataSet scatterDataSetGPS = new ScatterDataSet(scatterEntriesGPS, "GPS");
+                    scatterDataSetGPS.setColor(Color.RED);
+                    scatterDataSetGPS.setValueTextColor(Color.WHITE);
+                    scatterDataSetGPS.setScatterShapeSize(10f);
+                    scatterData.addDataSet(scatterDataSetGPS);
+                }
+
+                if (!scatterEntriesGlonass.isEmpty()) {
+                    ScatterDataSet scatterDataSetGlonass = new ScatterDataSet(scatterEntriesGlonass, "Glonass");
+                    scatterDataSetGlonass.setColor(Color.YELLOW);
+                    scatterDataSetGlonass.setValueTextColor(Color.WHITE);
+                    scatterDataSetGlonass.setScatterShapeSize(10f);
+                    scatterData.addDataSet(scatterDataSetGlonass);
+                }
+
+
+                if (!scatterEntriesGalileo.isEmpty()) {
+                    ScatterDataSet scatterDataSetGalileo = new ScatterDataSet(scatterEntriesGalileo, "Galileo");
+                    scatterDataSetGalileo.setColor(Color.GREEN);
+                    scatterDataSetGalileo.setValueTextColor(Color.WHITE);
+                    scatterDataSetGalileo.setScatterShapeSize(10f);
+                    scatterData.addDataSet(scatterDataSetGalileo);
+                }
+
+                if (!scatterEntriesUnknown.isEmpty()) {
+                    ScatterDataSet scatterDataSetUnknown = new ScatterDataSet(scatterEntriesUnknown, getString(R.string.unknownCheckBox));
+                    scatterDataSetUnknown.setColor(Color.GRAY);
+                    scatterDataSetUnknown.setValueTextColor(Color.WHITE);
+                    scatterDataSetUnknown.setScatterShapeSize(10f);
+                    scatterData.addDataSet(scatterDataSetUnknown);
+                }
+
+                // Configura os dados no gráfico
+                scatterChart.setData(scatterData);
+
+
+                // Configurações dos eixos
+                XAxis xAxis = scatterChart.getXAxis();
+                xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+                xAxis.setTextColor(Color.WHITE);
+
+                YAxis yAxisLeft = scatterChart.getAxisLeft();
+                yAxisLeft.setTextColor(Color.WHITE);
+                YAxis yAxisRight = scatterChart.getAxisRight();
+                yAxisRight.setTextColor(Color.WHITE);
+
+                scatterChart.getLegend().setEnabled(false); // Desabilita a legenda
+
+                // Descrição
+                scatterChart.getDescription().setText("SVID x SNR(dBHz)");
+                scatterChart.getDescription().setTextColor(Color.WHITE);
+
+                scatterChart.invalidate(); // Atualiza o gráfico
+            }
+        }
+    }

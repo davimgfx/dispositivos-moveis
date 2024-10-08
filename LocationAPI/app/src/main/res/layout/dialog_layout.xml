@@ -9,36 +9,36 @@
         android:id="@+id/gpsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GPS" />
+        android:text="@string/gpsCheckBox" />
 
     <CheckBox
         android:id="@+id/galileoCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GALILEO" />
+        android:text="@string/galileoCheckBox" />
 
     <CheckBox
         android:id="@+id/glonassCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GLONASS" />
+        android:text="@string/glonassCheckBox" />
 
     <CheckBox
         android:id="@+id/unknownCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Unknown" />
+        android:text="@string/unknownCheckBox" />
 
     <CheckBox
         android:id="@+id/usedInFixCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Used in Fix" />
+        android:text="@string/usedInFixCheckBox" />
 
     <CheckBox
         android:id="@+id/notUsedInFixCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Not used in Fix" />
+        android:text="@string/notUsedInFixCheckBox" />
 
 </LinearLayout>

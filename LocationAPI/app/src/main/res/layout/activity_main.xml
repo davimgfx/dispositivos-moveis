@@ -7,11 +7,11 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/textQuiz"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="248dp"
-        android:text="Atividade Avaliativa 1"
+        android:text="@string/textQuiz"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -31,19 +31,19 @@
             android:id="@+id/button_gnss"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="GNSS" />
+            android:text="@string/button_gnss" />
 
         <Button
-            android:id="@+id/button_gnss3"
+            android:id="@+id/button_activitity2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Atividade 2" />
+            android:text="@string/button_activitity2" />
 
         <Button
-            android:id="@+id/button_gnss2"
+            android:id="@+id/button_activitity3"
             android:layout_width="156dp"
             android:layout_height="wrap_content"
-            android:text="Atividade 3" />
+            android:text="@string/button_activitity3" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
