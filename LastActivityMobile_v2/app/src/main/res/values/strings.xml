@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">LastActivityMobile</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="title_activity_config_map">ConfigMap</string>
+    <string name="title_activity_trail_maps_waypoints">TrailMapsWaypoints</string>
+</resources>
