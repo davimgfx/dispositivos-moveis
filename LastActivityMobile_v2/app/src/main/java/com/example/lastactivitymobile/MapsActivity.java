@@ -236,6 +236,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (location != null) {
             LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 16)); // Sempre aponta para o norte
+
+            // Atualizar velocidade no modo "North up (default)"
+            float speed = location.getSpeed(); // Velocidade em m/s
+            velocityText.setText(String.format(Locale.getDefault(), "Velocidade: %.2f m/s", speed));
         }
     }
 
